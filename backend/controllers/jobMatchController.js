@@ -3,8 +3,9 @@ import groq from '../config/groq.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 export const matchJob = asyncHandler(async (req, res) => {
-  const { jobDescription } = req.body;
+  console.log("✅ matchJob controller started");
 
+  const { jobDescription } = req.body;
   if (!jobDescription) {
     return res.status(400).json({ error: { message: 'Job description is required' } });
   }
