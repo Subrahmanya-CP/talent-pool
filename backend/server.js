@@ -22,10 +22,19 @@ app.use(helmet());
 app.disable('x-powered-by');
 
 // CORS configuration
+// app.use(cors({
+//   origin: FRONTEND_URL,
+//   credentials: true,
+// }));
+
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.options('*', cors());
 
 // Request logging
 if (process.env.NODE_ENV !== 'production') {
