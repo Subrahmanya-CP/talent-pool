@@ -1,4 +1,5 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from '../config/s3.js';
 import { randomBytes } from 'crypto';
 
@@ -39,4 +40,39 @@ export const uploadToS3 = async (buffer, originalName, mimeType) => {
   }
 };
 
-export default { uploadToS3 };
+export const getPresignedUrl = async (s3Url, expiresIn = 900) => {
+  const bucketName = process.env.AWS_S3_BUCKET;
+  if (!bucketName) {
+    throw new Error('AWS_S3_BUCKET environment variable is not set');
+  }
+
+  if (!s3Url) {
+    throw new Error('S3 URL is required to generate presigned URL');
+  }
+
+  let objectKey;
+  try {
+    const parsedUrl = new URL(s3Url);
+    objectKey = parsedUrl.pathname.replace(/^\//, '');
+  } catch (error) {
+    throw new Error('Invalid S3 URL provided');
+  }
+
+  if (!objectKey) {
+    throw new Error('Unable to determine S3 object key');
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: objectKey,
+  });
+
+  try {
+    return await getSignedUrl(s3Client, command, { expiresIn });
+  } catch (error) {
+    console.error('S3 Presign Error:', error);
+    throw new Error(`Failed to generate presigned URL: ${error.message}`);
+  }
+};
+
+export default { uploadToS3, getPresignedUrl };

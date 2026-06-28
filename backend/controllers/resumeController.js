@@ -4,7 +4,7 @@ import { extractTextFromDOCX } from '../utils/docxExtractor.js';
 import { extractContactInfo } from '../utils/contactExtractor.js';
 import { scrubPII } from '../utils/piiScrubber.js';
 import { extractCandidateInfo } from '../services/aiService.js';
-import { uploadToS3 } from '../services/s3Service.js';
+import { uploadToS3, getPresignedUrl } from '../services/s3Service.js';
 import { candidateQueries } from '../database/candidateQueries.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
@@ -76,6 +76,25 @@ export const resumeController = {
         count: processedCandidates.length,
       },
     });
+  }),
+
+  /**
+   * Redirect to a presigned S3 URL for a candidate resume
+   * GET /api/resumes/view/:id
+   */
+  viewResumeById: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const candidate = await candidateQueries.getCandidateById(id);
+
+    if (!candidate || !candidate.resume_s3_url) {
+      return res.status(404).json({
+        success: false,
+        error: { message: 'Resume not found' },
+      });
+    }
+
+    const presignedUrl = await getPresignedUrl(candidate.resume_s3_url);
+    return res.redirect(303, presignedUrl);
   }),
 };
 

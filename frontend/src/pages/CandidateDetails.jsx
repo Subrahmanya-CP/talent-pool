@@ -201,7 +201,7 @@ const CandidateDetails = () => {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Resume</h2>
                 <a
-                  href={candidate.resume_s3_url}
+                  href={`/api/resumes/view/${candidate.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"

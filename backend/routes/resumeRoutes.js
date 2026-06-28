@@ -11,4 +11,11 @@ const router = express.Router();
  */
 router.post('/upload', uploadMiddleware, resumeController.uploadResumes);
 
+/**
+ * @route   GET /api/resumes/view/:id
+ * @desc    Redirect to a presigned S3 URL for a candidate resume
+ * @access  Public
+ */
+router.get('/view/:id', resumeController.viewResumeById);
+
 export default router;
